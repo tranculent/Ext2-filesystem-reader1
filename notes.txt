@@ -1,0 +1,5 @@
+
+		// the byte array that will be backing the buffer
+		byte buffer[] = file.read(offset, 4);
+		// the capacity of byteBuffer now becomes buffer.length
+		byteBuffer = ByteBuffer.wrap(buffer);
