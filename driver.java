@@ -2,7 +2,7 @@ import java.util.Arrays;
 
 public class driver {
     public static void main(String[] args) throws Exception {
-        Volume vol = new Volume("demo.txt");
+        Volume vol = new Volume("ext2fs");
         Ext2File f = new Ext2File(vol);
         
         System.out.println();

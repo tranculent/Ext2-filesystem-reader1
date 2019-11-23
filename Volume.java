@@ -1,5 +1,9 @@
 import java.io.*;
 
+/**
+ * To locate inodes and blocks, we need Volume that holds the filesystem, and it is the firs component to be read.
+ * 
+ */
 public class Volume {
     private RandomAccessFile randomAccessFile;
     private String fileName;
