@@ -51,7 +51,7 @@ public class Inode {
     /**
      * Contains file's data
      */
-    private int dataBlockPointers;
+    private int dataBlockPointers[];
     /**
      * Pointer to an indirect block which contains pointers to the next set of blocks
      */
@@ -70,27 +70,54 @@ public class Inode {
 
     public Inode(int startingPoint, Ext2File file) {
 		this.startingPoint = startingPoint;
-		process();
 		this.file = file;
+		process();
     }
 
     private void process() {
 		byteBuffer = ByteBuffer.wrap(file.read(startingPoint + 112)).order(ByteOrder.LITTLE_ENDIAN);
 
-		fileMode = byteBuffer.getInt(0 + 2);
-		userId = byteBuffer.getInt(2 + 2);
-		lastAccessTime = byteBuffer.getInt(8 + 4);
-		creationTime = byteBuffer.getInt(12 + 4);
-		lastModifiedTime = byteBuffer.getInt(16 + 4);
-		deletedTime = byteBuffer.getInt(20 + 4);
-		groupId = byteBuffer.getInt(24 + 2);
-		numHardLinks = byteBuffer.getInt(26 + 2);
-		dataBlockPointers = byteBuffer.getInt(40 + 48);
+		fileMode = byteBuffer.getInt(startingPoint + 0 + 2);
+		userId = byteBuffer.getInt(startingPoint + 2 + 2);
+		lastAccessTime = byteBuffer.getInt(startingPoint + 8 + 4);
+		creationTime = byteBuffer.getInt(startingPoint + 12 + 4);
+		lastModifiedTime = byteBuffer.getInt(startingPoint + 16 + 4);
+		deletedTime = byteBuffer.getInt(startingPoint + 20 + 4);
+		groupId = byteBuffer.getInt(startingPoint + 24 + 2);
+		numHardLinks = byteBuffer.getInt(startingPoint + 26 + 2);
+		indirectPointer = byteBuffer.getInt(startingPoint + 88 + 4);
+		doubleIndirectPointer = byteBuffer.getInt(startingPoint + 92 + 4);
+		tripleIndirectPointer = byteBuffer.getInt(startingPoint + 96 + 4);
+		fileSize = byteBuffer.getInt(startingPoint + 108 + 4);
+		
+		dataBlockPointers = new int[12];
+		for (int i = 0; i < 12; i++) {
+			byteBuffer = ByteBuffer.wrap(file.read(startingPoint+40+(i*4), 4));
+			dataBlockPointers[i] = byteBuffer.getInt();
+		}
 	}
 
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		
+		stringBuilder.append("==================Inode Contents==================\n");
+		stringBuilder.append("\nFile Mode: " + fileMode);
+		stringBuilder.append("\nUser Id: " + userId);
+		stringBuilder.append("\nLast Access Time: " + lastAccessTime);
+		stringBuilder.append("\nCreation Time: " + creationTime);
+		stringBuilder.append("\nLast Modified Time: " + lastModifiedTime);
+		stringBuilder.append("\nDeleted Time: " + deletedTime);
+		stringBuilder.append("\nGroup Id: " + groupId);
+		stringBuilder.append("\nNumber of Hard Links: " + numHardLinks);
+		stringBuilder.append("\nData Block Pointers: ");
+		for (int i = 0; i < dataBlockPointers.length; i++) 
+			stringBuilder.append(dataBlockPointers[i] + "\n");
+		stringBuilder.append("\nIndirect Pointer: " + indirectPointer);
+		stringBuilder.append("\nDouble Indirect Pointer: " + doubleIndirectPointer);
+		stringBuilder.append("\nTriple Indirect Pointer: " + tripleIndirectPointer);
+		stringBuilder.append("\nFile Size: " + fileSize);
+
+		return stringBuilder.toString();
 	}
 
 	public int getStartingPoint() {
@@ -125,35 +152,35 @@ public class Inode {
 		this.fileSize = fileSize;
 	}
 
-	public Date getLastAccessTime() {
+	public int getLastAccessTime() {
 		return this.lastAccessTime;
 	}
 
-	public void setLastAccessTime(Date lastAccessTime) {
+	public void setLastAccessTime(int lastAccessTime) {
 		this.lastAccessTime = lastAccessTime;
 	}
 
-	public Date getCreationTime() {
+	public int getCreationTime() {
 		return this.creationTime;
 	}
 
-	public void setCreationTime(Date creationTime) {
+	public void setCreationTime(int creationTime) {
 		this.creationTime = creationTime;
 	}
 
-	public Date getLastModifiedTime() {
+	public int getLastModifiedTime() {
 		return this.lastModifiedTime;
 	}
 
-	public void setLastModifiedTime(Date lastModifiedTime) {
+	public void setLastModifiedTime(int lastModifiedTime) {
 		this.lastModifiedTime = lastModifiedTime;
 	}
 
-	public Date getDeletedTime() {
+	public int getDeletedTime() {
 		return this.deletedTime;
 	}
 
-	public void setDeletedTime(Date deletedTime) {
+	public void setDeletedTime(int deletedTime) {
 		this.deletedTime = deletedTime;
 	}
 
