@@ -1,3 +1,5 @@
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Date;
 
 /**
@@ -24,19 +26,19 @@ public class Inode {
     /**
      * Indicates the time when the file was last accessed
      */
-    private Date lastAccessTime;
+    private int lastAccessTime;
     /** 
      * Indicates the time when the file was created
      */
-    private Date creationTime;
+    private int creationTime;
     /**
      * Indicates the time when the file was last modified
      */
-    private Date lastModifiedTime;
+    private int lastModifiedTime;
     /** 
      * Indicates when the when the file was deleted
      */
-    private Date deletedTime;
+    private int deletedTime;
     /**
      * Indicates the group id of the user accessing this file?
      */
@@ -49,7 +51,7 @@ public class Inode {
     /**
      * Contains file's data
      */
-    private int dataBlockPointers[] = new int[4];
+    private int dataBlockPointers;
     /**
      * Pointer to an indirect block which contains pointers to the next set of blocks
      */
@@ -61,13 +63,37 @@ public class Inode {
     /**
      * Pointer to a trebly-indirect block which contains pointers to doubly-indirect blocks
      */
-    private int tripleIndirectPointer;
+	private int tripleIndirectPointer;
+	
+	private Ext2File file;
+	private ByteBuffer byteBuffer;
 
-    public Inode(int startingPoint) {
-        this.startingPoint = startingPoint;
+    public Inode(int startingPoint, Ext2File file) {
+		this.startingPoint = startingPoint;
+		process();
+		this.file = file;
     }
 
-    public int getStartingPoint() {
+    private void process() {
+		byteBuffer = ByteBuffer.wrap(file.read(startingPoint + 112)).order(ByteOrder.LITTLE_ENDIAN);
+
+		fileMode = byteBuffer.getInt(0 + 2);
+		userId = byteBuffer.getInt(2 + 2);
+		lastAccessTime = byteBuffer.getInt(8 + 4);
+		creationTime = byteBuffer.getInt(12 + 4);
+		lastModifiedTime = byteBuffer.getInt(16 + 4);
+		deletedTime = byteBuffer.getInt(20 + 4);
+		groupId = byteBuffer.getInt(24 + 2);
+		numHardLinks = byteBuffer.getInt(26 + 2);
+		dataBlockPointers = byteBuffer.getInt(40 + 48);
+	}
+
+	public String toString() {
+		StringBuilder stringBuilder = new StringBuilder();
+		
+	}
+
+	public int getStartingPoint() {
         return this.startingPoint;
     }
 
