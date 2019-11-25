@@ -2,6 +2,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Date;
 
+// TODO:
+// add dates so it can be traced when the file was created, deleted and modified ;
+
 /**
  * Each object in the filesystem is represented by an inode.
  */
