@@ -1,6 +1,7 @@
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Date;
+import java.util.HashMap;
 
 // TODO:
 // add dates so it can be traced when the file was created, deleted and modified ;
@@ -67,6 +68,11 @@ public class Inode {
      * Pointer to a trebly-indirect block which contains pointers to doubly-indirect blocks
      */
 	private int tripleIndirectPointer;
+
+	/**
+	 * HashMap that will store all the months in <Integer, String> format
+	 */
+	private HashMap<Integer, String> months = new HashMap<>();
 	
 	private Ext2File file;
 	private ByteBuffer byteBuffer;
@@ -76,7 +82,7 @@ public class Inode {
 		this.file = file;
 		process();
     }
-
+	
     private void process() {
 		byteBuffer = ByteBuffer.wrap(file.read(startingPoint + 112)).order(ByteOrder.LITTLE_ENDIAN);
 
@@ -91,34 +97,122 @@ public class Inode {
 		indirectPointer = byteBuffer.getInt(startingPoint + 88 + 4);
 		doubleIndirectPointer = byteBuffer.getInt(startingPoint + 92 + 4);
 		tripleIndirectPointer = byteBuffer.getInt(startingPoint + 96 + 4);
-		fileSize = byteBuffer.getInt(startingPoint + 108 + 4);
-		
+		// fileSize = byteBuffer.getInt(startingPoint + 108 + 4);
+
+		months.put(0, "Jan");
+		months.put(1, "Fev");
+		months.put(2, "Mar");
+		months.put(3, "Apr");
+		months.put(4, "May");
+		months.put(5, "Jun");
+		months.put(6, "Jul");
+		months.put(7, "Aug");
+		months.put(8, "Sep");
+		months.put(9, "Oct");
+		months.put(10, "Nov");
+		months.put(11, "Dec");
+
+		/* INFINITE LOOP HERE */
+
 		dataBlockPointers = new int[12];
 		for (int i = 0; i < 12; i++) {
-			byteBuffer = ByteBuffer.wrap(file.read(startingPoint+40+(i*4), 4));
+			System.out.println("Here??");
+			byteBuffer = ByteBuffer.wrap(file.read(startingPoint+40+(i*4), 4)).order(ByteOrder.LITTLE_ENDIAN);
 			dataBlockPointers[i] = byteBuffer.getInt();
 		}
 	}
 
+	@Deprecated
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
+
+		/*
+		   	drwxr-xr-x  4 root root   1024 Aug 13 20:20 .
+			drwxr-xr-x 25 root root   4096 Aug 11 11:15 ..
+			drwxr-xr-x  3 acs  staff  1024 Aug 13 20:20 home
+			drwx------  2 root root  12288 Aug 11 11:06 lost+found
+			-rw-r--r--  1 acs  staff     0 Aug 11 22:17 test
+		*/
+
+		/* File Type */
+		// d
+		if (fileMode == 0x8000)
+			System.out.print("-"); // file
+		else if (fileMode == 0x4000)
+			System.out.print("d"); // directory
+
+		/* User Permissions */ 
+		// drwx
+		if (fileMode == 0x0100)
+			System.out.print("r"); // read
+		else 
+			System.out.print("-"); // non-read
+
+		if (fileMode == 0x0080)
+			System.out.print("w"); // write
+		else 
+			System.out.print("-"); // non-write
+
+		if (fileMode == 0x0040)
+			System.out.print("x"); // execute permission
+		else 
+			System.out.print("-"); // non-execution permission
+
+		/* Group Permissions */
+		// drwxr-x
+		if(fileMode == 0x0020)
+			System.out.print("r");
+		else
+			System.out.print("-");
 		
-		stringBuilder.append("==================Inode Contents==================\n");
-		stringBuilder.append("\nFile Mode: " + fileMode);
-		stringBuilder.append("\nUser Id: " + userId);
-		stringBuilder.append("\nLast Access Time: " + lastAccessTime);
-		stringBuilder.append("\nCreation Time: " + creationTime);
-		stringBuilder.append("\nLast Modified Time: " + lastModifiedTime);
-		stringBuilder.append("\nDeleted Time: " + deletedTime);
-		stringBuilder.append("\nGroup Id: " + groupId);
-		stringBuilder.append("\nNumber of Hard Links: " + numHardLinks);
-		stringBuilder.append("\nData Block Pointers: ");
-		for (int i = 0; i < dataBlockPointers.length; i++) 
-			stringBuilder.append(dataBlockPointers[i] + "\n");
-		stringBuilder.append("\nIndirect Pointer: " + indirectPointer);
-		stringBuilder.append("\nDouble Indirect Pointer: " + doubleIndirectPointer);
-		stringBuilder.append("\nTriple Indirect Pointer: " + tripleIndirectPointer);
-		stringBuilder.append("\nFile Size: " + fileSize);
+		if(fileMode == 0x0010)
+			System.out.print("w");
+		else
+			System.out.print("-");
+		
+		if(fileMode == 0x0008)
+			System.out.print("x");
+		else
+			System.out.print("-");
+
+		/* Other Permissions */
+		// drwxr-xr-x |STOP HERE|
+		if(fileMode == 0x0004)
+			System.out.print("r");
+		else
+			System.out.print("-");
+		
+		if(fileMode == 0x0002)
+			System.out.print("w");
+		else
+			System.out.print("-");
+		
+		if(fileMode == 0x0001)
+			System.out.print("x ");
+		else
+			System.out.print("- ");
+
+		/* Hard Links */
+		System.out.print(numHardLinks + " ");
+
+		/* User ID */
+		System.out.print(userId + " ");
+
+		/* Group ID */
+		System.out.print(groupId + "    ");
+
+		/* File Size */
+		System.out.print(fileSize + " ");
+
+		/* Dates */
+		Date lastModifiedInDateFormat = new Date((long)lastModifiedTime * 1000L);
+		
+		System.out.print(months.get(lastModifiedInDateFormat.getMonth()) + " ");
+		System.out.print((lastModifiedInDateFormat.getDay() + " "));
+		System.out.print(lastModifiedInDateFormat.getHours() + 1 > 9 ? lastModifiedInDateFormat.getHours() + ":" : "0" + lastModifiedInDateFormat.getHours() + ":"); // 09:
+		System.out.print(lastModifiedInDateFormat.getMinutes() + 1 > 9 ?lastModifiedInDateFormat.getMinutes() + " " : "0" + lastModifiedInDateFormat.getMinutes() + " "); // 09:01
+
+		/* Directory */
 
 		return stringBuilder.toString();
 	}

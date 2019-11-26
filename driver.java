@@ -1,4 +1,3 @@
-import java.util.Arrays;
 
 public class driver {
     public static void main(String[] args) throws Exception {
@@ -18,5 +17,6 @@ public class driver {
         // new Helper().dumpHexBytes(f.read(1024, 136)); // block size => 1024
         System.out.println(sp);
         System.out.println("================================");
+        InodeTable n = new InodeTable(f, sp);
     }
 }

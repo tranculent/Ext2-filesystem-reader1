@@ -12,7 +12,7 @@ public class SuperBlock {
 	private int blocksCount;
 	private int blocksPerGroup;
 	private int inodesPerGroup;
-	private ByteBuffer byteBuffer; // modifications made to the buffer will also be made to the bytes array
+	private ByteBuffer byteBuffer;
 
 	public SuperBlock(int start, Ext2File file) throws IOException {
 		// bytes represents the data that is stored in the Superblock
@@ -30,13 +30,13 @@ public class SuperBlock {
 		inodeSize      = byteBuffer.getInt(startingPoint + 88 + 4); // inodes size      offset
 		blocksCount    = byteBuffer.getInt(startingPoint + 4 + 4);  // blocks count     offset
 		blocksPerGroup = byteBuffer.getInt(startingPoint + 32 + 4); // blocks per group offset
-		inodesPerGroup = byteBuffer.getInt(startingPoint + 40 + 4); // inodes per group offset
+		inodesPerGroup = byteBuffer.getInt(startingPoint + 40); // inodes per group offset
 		
 		byte[] volumeBytes = new byte[16];
 		int index = 0;
-		for (int i = 120; i < 136; i++) {
+		for (int i = 120; i < 136; i++) 
 			volumeBytes[index++] = byteBuffer.get(i);
-		}
+		
 		volumeName = new String(volumeBytes);
 	}
 
