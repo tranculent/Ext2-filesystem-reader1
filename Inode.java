@@ -16,11 +16,11 @@ public class Inode {
     private int startingPoint;
 
     /**
-     * Indicates the permission of the file?
+     * Indicates the permission
      */
     private int fileMode; // fileMode == permission
     /**
-     * Indicates the user id of the user accessing this file?
+     * Indicates the user id of the user accessing this file
      */
     private int userId;
     /**
@@ -44,7 +44,7 @@ public class Inode {
      */
     private int deletedTime;
     /**
-     * Indicates the group id of the user accessing this file?
+     * Indicates the group id of the user accessing this file
      */
     private int groupId;
     /**
@@ -84,19 +84,18 @@ public class Inode {
     }
 	
     private void process() {
-		byteBuffer = ByteBuffer.wrap(file.read(startingPoint + 112)).order(ByteOrder.LITTLE_ENDIAN);
-
-		fileMode = byteBuffer.getInt(startingPoint + 0 + 2);
-		userId = byteBuffer.getInt(startingPoint + 2 + 2);
-		lastAccessTime = byteBuffer.getInt(startingPoint + 8 + 4);
-		creationTime = byteBuffer.getInt(startingPoint + 12 + 4);
-		lastModifiedTime = byteBuffer.getInt(startingPoint + 16 + 4);
-		deletedTime = byteBuffer.getInt(startingPoint + 20 + 4);
-		groupId = byteBuffer.getInt(startingPoint + 24 + 2);
-		numHardLinks = byteBuffer.getInt(startingPoint + 26 + 2);
-		indirectPointer = byteBuffer.getInt(startingPoint + 88 + 4);
-		doubleIndirectPointer = byteBuffer.getInt(startingPoint + 92 + 4);
-		tripleIndirectPointer = byteBuffer.getInt(startingPoint + 96 + 4);
+		byteBuffer 				= ByteBuffer.wrap(file.read(startingPoint, 112)).order(ByteOrder.LITTLE_ENDIAN);
+		fileMode 				= byteBuffer.getInt(startingPoint + 0 + 2);
+		userId 					= byteBuffer.getInt(startingPoint + 2 + 2);
+		lastAccessTime 			= byteBuffer.getInt(startingPoint + 8 + 4);
+		creationTime 			= byteBuffer.getInt(startingPoint + 12 + 4);
+		lastModifiedTime 		= byteBuffer.getInt(startingPoint + 16 + 4);
+		deletedTime 			= byteBuffer.getInt(startingPoint + 20 + 4);
+		groupId 				= byteBuffer.getInt(startingPoint + 24 + 2);
+		numHardLinks 			= byteBuffer.getInt(startingPoint + 26 + 2);
+		indirectPointer 		= byteBuffer.getInt(startingPoint + 88 + 4);
+		doubleIndirectPointer 	= byteBuffer.getInt(startingPoint + 92 + 4);
+		tripleIndirectPointer 	= byteBuffer.getInt(startingPoint + 96 + 4);
 		// fileSize = byteBuffer.getInt(startingPoint + 108 + 4);
 
 		months.put(0, "Jan");
@@ -112,12 +111,10 @@ public class Inode {
 		months.put(10, "Nov");
 		months.put(11, "Dec");
 
-		/* INFINITE LOOP HERE */
-
 		dataBlockPointers = new int[12];
 		for (int i = 0; i < 12; i++) {
 			System.out.println("Here??");
-			byteBuffer = ByteBuffer.wrap(file.read(startingPoint+40+(i*4), 4)).order(ByteOrder.LITTLE_ENDIAN);
+			byteBuffer = ByteBuffer.wrap(file.read(startingPoint + 40 + (i * 4), 4)).order(ByteOrder.LITTLE_ENDIAN);
 			dataBlockPointers[i] = byteBuffer.getInt();
 		}
 	}
@@ -137,195 +134,139 @@ public class Inode {
 		/* File Type */
 		// d
 		if (fileMode == 0x8000)
-			System.out.print("-"); // file
+			stringBuilder.append("-"); // file
 		else if (fileMode == 0x4000)
-			System.out.print("d"); // directory
+			stringBuilder.append("d"); // directory
 
 		/* User Permissions */ 
 		// drwx
 		if (fileMode == 0x0100)
-			System.out.print("r"); // read
+			stringBuilder.append("r"); // read
 		else 
-			System.out.print("-"); // non-read
+			stringBuilder.append("-"); // non-read
 
 		if (fileMode == 0x0080)
-			System.out.print("w"); // write
+			stringBuilder.append("w"); // write
 		else 
-			System.out.print("-"); // non-write
+			stringBuilder.append("-"); // non-write
 
 		if (fileMode == 0x0040)
-			System.out.print("x"); // execute permission
+			stringBuilder.append("x"); // execute permission
 		else 
-			System.out.print("-"); // non-execution permission
+			stringBuilder.append("-"); // non-execution permission
 
 		/* Group Permissions */
 		// drwxr-x
 		if(fileMode == 0x0020)
-			System.out.print("r");
+			stringBuilder.append("r");
 		else
-			System.out.print("-");
+			stringBuilder.append("-");
 		
 		if(fileMode == 0x0010)
-			System.out.print("w");
+			stringBuilder.append("w");
 		else
-			System.out.print("-");
+			stringBuilder.append("-");
 		
 		if(fileMode == 0x0008)
-			System.out.print("x");
+			stringBuilder.append("x");
 		else
-			System.out.print("-");
+			stringBuilder.append("-");
 
 		/* Other Permissions */
 		// drwxr-xr-x |STOP HERE|
 		if(fileMode == 0x0004)
-			System.out.print("r");
+			stringBuilder.append("r");
 		else
-			System.out.print("-");
+			stringBuilder.append("-");
 		
 		if(fileMode == 0x0002)
-			System.out.print("w");
+			stringBuilder.append("w");
 		else
-			System.out.print("-");
+			stringBuilder.append("-");
 		
 		if(fileMode == 0x0001)
-			System.out.print("x ");
+			stringBuilder.append("x ");
 		else
-			System.out.print("- ");
+			stringBuilder.append("- ");
 
 		/* Hard Links */
-		System.out.print(numHardLinks + " ");
+		stringBuilder.append(numHardLinks + " ");
 
 		/* User ID */
-		System.out.print(userId + " ");
+		stringBuilder.append(userId + " ");
 
 		/* Group ID */
-		System.out.print(groupId + "    ");
+		stringBuilder.append(groupId + "    ");
 
 		/* File Size */
-		System.out.print(fileSize + " ");
+		stringBuilder.append(fileSize + " ");
 
 		/* Dates */
 		Date lastModifiedInDateFormat = new Date((long)lastModifiedTime * 1000L);
 		
-		System.out.print(months.get(lastModifiedInDateFormat.getMonth()) + " ");
-		System.out.print((lastModifiedInDateFormat.getDay() + " "));
-		System.out.print(lastModifiedInDateFormat.getHours() + 1 > 9 ? lastModifiedInDateFormat.getHours() + ":" : "0" + lastModifiedInDateFormat.getHours() + ":"); // 09:
-		System.out.print(lastModifiedInDateFormat.getMinutes() + 1 > 9 ?lastModifiedInDateFormat.getMinutes() + " " : "0" + lastModifiedInDateFormat.getMinutes() + " "); // 09:01
+		stringBuilder.append(months.get(lastModifiedInDateFormat.getMonth()) + " ");
+		stringBuilder.append((lastModifiedInDateFormat.getDay() + " "));
+		stringBuilder.append(lastModifiedInDateFormat.getHours() + 1 > 9 ? lastModifiedInDateFormat.getHours() + ":" : "0" + lastModifiedInDateFormat.getHours() + ":"); // 09:
+		stringBuilder.append(lastModifiedInDateFormat.getMinutes() + 1 > 9 ?lastModifiedInDateFormat.getMinutes() + " " : "0" + lastModifiedInDateFormat.getMinutes() + " "); // 09:01
 
-		/* Directory */
+		/* Directory Name */
 
-		return stringBuilder.toString();
+		return stringBuilder.toString() + "\n";
 	}
 
 	public int getStartingPoint() {
         return this.startingPoint;
     }
 
-    public void setStartingPoint(int startingPoint) {
-        this.startingPoint = startingPoint;
-    }
-
 	public int getFileMode() {
 		return this.fileMode;
-	}
-
-	public void setFileMode(int fileMode) {
-		this.fileMode = fileMode;
 	}
 
 	public int getUserId() {
 		return this.userId;
 	}
 
-	public void setUserId(int userId) {
-		this.userId = userId;
-	}
-
 	public int getFileSize() {
 		return this.fileSize;
-	}
-
-	public void setFileSize(int fileSize) {
-		this.fileSize = fileSize;
 	}
 
 	public int getLastAccessTime() {
 		return this.lastAccessTime;
 	}
 
-	public void setLastAccessTime(int lastAccessTime) {
-		this.lastAccessTime = lastAccessTime;
-	}
-
 	public int getCreationTime() {
 		return this.creationTime;
-	}
-
-	public void setCreationTime(int creationTime) {
-		this.creationTime = creationTime;
 	}
 
 	public int getLastModifiedTime() {
 		return this.lastModifiedTime;
 	}
 
-	public void setLastModifiedTime(int lastModifiedTime) {
-		this.lastModifiedTime = lastModifiedTime;
-	}
-
 	public int getDeletedTime() {
 		return this.deletedTime;
-	}
-
-	public void setDeletedTime(int deletedTime) {
-		this.deletedTime = deletedTime;
 	}
 
 	public int getGroupId() {
 		return this.groupId;
 	}
-
-	public void setGroupId(int groupId) {
-		this.groupId = groupId;
-	}
-
+	
 	public int getNumHardLinks() {
 		return this.numHardLinks;
-	}
-
-	public void setNumHardLinks(int numHardLinks) {
-		this.numHardLinks = numHardLinks;
 	}
 
 	public int[] getDataBlockPointers() {
 		return this.dataBlockPointers;
 	}
 
-	public void setDataBlockPointers(int dataBlockPointers[]) {
-		this.dataBlockPointers = dataBlockPointers;
-	}
-
 	public int getIndirectPointer() {
 		return this.indirectPointer;
-	}
-
-	public void setIndirectPointer(int indirectPointer) {
-		this.indirectPointer = indirectPointer;
 	}
 
 	public int getDoubleIndirectPointer() {
 		return this.doubleIndirectPointer;
 	}
 
-	public void setDoubleIndirectPointer(int doubleIndirectPointer) {
-		this.doubleIndirectPointer = doubleIndirectPointer;
-	}
-
 	public int getTripleIndirectPointer() {
 		return this.tripleIndirectPointer;
-	}
-
-	public void setTripleIndirectPointer(int tripleIndirectPointer) {
-		this.tripleIndirectPointer = tripleIndirectPointer;
 	}
 }

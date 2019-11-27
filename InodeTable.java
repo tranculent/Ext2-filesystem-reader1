@@ -13,7 +13,6 @@ public class InodeTable {
     private int offset;
 
     /**
-     * 
      * @param file The file to be examined
      * @param superBlock The Superblock
      */
@@ -35,7 +34,6 @@ public class InodeTable {
         remainding      = superBlock.getInodesCount() % superBlock.getInodesPerGroup();
         inodesPerGroup  = superBlock.getInodesPerGroup();
         inodeSize       = superBlock.getInodeSize();
-        
     }
 
     /**
@@ -48,10 +46,8 @@ public class InodeTable {
             offset = inodeTablePointer.getInt() * 1024; // move to the next block
 
             // populating the array
-            for (int j = inodesPerGroup * i; j < inodesPerGroup * (i + 1); j++) {
-                inodes[j] = new Inode(offset, file);
-                offset += inodeSize;
-            }
+            inodes[j] = new Inode(offset, file); // PROBLEM 
+            offset += inodeSize;
         }
     }
 
