@@ -39,7 +39,9 @@ public class Helper {
 					else
         				System.out.print("~"); // Print '~' if the character is not in the ASCII table in between values 31 and 123
         		}
-        	}
+			}
+			
+			System.out.print(" | ");
 			
 			// print the next 8 bytes of the current sequence (8-16)
         	for (int j = offset + 8; j < offset + 16; j++) {

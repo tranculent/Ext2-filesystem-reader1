@@ -18,11 +18,11 @@ public class Inode {
     /**
      * Indicates the permission
      */
-    private int fileMode; // fileMode == permission
+    private short fileMode; // fileMode == permission
     /**
      * Indicates the user id of the user accessing this file
      */
-    private int userId;
+    private short userId;
     /**
      * Indicates the file size
      */
@@ -46,12 +46,12 @@ public class Inode {
     /**
      * Indicates the group id of the user accessing this file
      */
-    private int groupId;
+    private short groupId;
     /**
      * Hard links allow you to have multiple "file names" that point to the same inode.
      * numHardLinks specifies the number of hard links of the current file
      */
-    private int numHardLinks;
+    private short numHardLinks;
     /**
      * Contains file's data
      */
@@ -84,19 +84,25 @@ public class Inode {
     }
 	
     private void process() {
-		byteBuffer 				= ByteBuffer.wrap(file.read(startingPoint, 112)).order(ByteOrder.LITTLE_ENDIAN);
-		fileMode 				= byteBuffer.getInt(startingPoint + 0 + 2);
-		userId 					= byteBuffer.getInt(startingPoint + 2 + 2);
-		lastAccessTime 			= byteBuffer.getInt(startingPoint + 8 + 4);
-		creationTime 			= byteBuffer.getInt(startingPoint + 12 + 4);
-		lastModifiedTime 		= byteBuffer.getInt(startingPoint + 16 + 4);
-		deletedTime 			= byteBuffer.getInt(startingPoint + 20 + 4);
-		groupId 				= byteBuffer.getInt(startingPoint + 24 + 2);
-		numHardLinks 			= byteBuffer.getInt(startingPoint + 26 + 2);
-		indirectPointer 		= byteBuffer.getInt(startingPoint + 88 + 4);
-		doubleIndirectPointer 	= byteBuffer.getInt(startingPoint + 92 + 4);
-		tripleIndirectPointer 	= byteBuffer.getInt(startingPoint + 96 + 4);
-		// fileSize = byteBuffer.getInt(startingPoint + 108 + 4);
+		byteBuffer 				= ByteBuffer.wrap(file.read(startingPoint, 128)).order(ByteOrder.LITTLE_ENDIAN);
+		fileMode 				= byteBuffer.getShort(startingPoint + 0);
+		userId 					= byteBuffer.getShort(startingPoint + 2);
+		lastAccessTime 			= byteBuffer.getInt(startingPoint + 8);
+		creationTime 			= byteBuffer.getInt(startingPoint + 12);
+		lastModifiedTime 		= byteBuffer.getInt(startingPoint + 16);
+		deletedTime 			= byteBuffer.getInt(startingPoint + 20);
+		groupId 				= byteBuffer.getShort(startingPoint + 24);
+		numHardLinks 			= byteBuffer.getShort(startingPoint + 26);
+		indirectPointer 		= byteBuffer.getInt(startingPoint + 88);
+		doubleIndirectPointer 	= byteBuffer.getInt(startingPoint + 92);
+		tripleIndirectPointer 	= byteBuffer.getInt(startingPoint + 96);
+		dataBlockPointers 		= new int[12];
+
+		// Populate data block pointers
+		for (int i = 0; i < 12; i++) {
+			byteBuffer = ByteBuffer.wrap(file.read(startingPoint + 40 + (i * 4), 4)).order(ByteOrder.LITTLE_ENDIAN);
+			dataBlockPointers[i] = byteBuffer.getInt();
+		}
 
 		months.put(0, "Jan");
 		months.put(1, "Fev");
@@ -110,13 +116,6 @@ public class Inode {
 		months.put(9, "Oct");
 		months.put(10, "Nov");
 		months.put(11, "Dec");
-
-		dataBlockPointers = new int[12];
-		for (int i = 0; i < 12; i++) {
-			System.out.println("Here??");
-			byteBuffer = ByteBuffer.wrap(file.read(startingPoint + 40 + (i * 4), 4)).order(ByteOrder.LITTLE_ENDIAN);
-			dataBlockPointers[i] = byteBuffer.getInt();
-		}
 	}
 
 	@Deprecated
@@ -124,67 +123,67 @@ public class Inode {
 		StringBuilder stringBuilder = new StringBuilder();
 
 		/*
-		   	drwxr-xr-x  4 root root   1024 Aug 13 20:20 .
-			drwxr-xr-x 25 root root   4096 Aug 11 11:15 ..
-			drwxr-xr-x  3 acs  staff  1024 Aug 13 20:20 home
-			drwx------  2 root root  12288 Aug 11 11:06 lost+found
-			-rw-r--r--  1 acs  staff     0 Aug 11 22:17 test
+		   	drwxr-xr-x  4 root root   1024 Aug 13 20:20
+			drwxr-xr-x 25 root root   4096 Aug 11 11:15
+			drwxr-xr-x  3 acs  staff  1024 Aug 13 20:20
+			drwx------  2 root root  12288 Aug 11 11:06
+			-rw-r--r--  1 acs  staff     0 Aug 11 22:17
 		*/
 
 		/* File Type */
 		// d
-		if (fileMode == 0x8000)
+		if ((fileMode & 0x8000) == 0x8000)
 			stringBuilder.append("-"); // file
-		else if (fileMode == 0x4000)
+		else if ((fileMode & 0x4000) == 0x4000)
 			stringBuilder.append("d"); // directory
 
 		/* User Permissions */ 
 		// drwx
-		if (fileMode == 0x0100)
+		if ((fileMode & 0x0100) == 0x0100)
 			stringBuilder.append("r"); // read
 		else 
 			stringBuilder.append("-"); // non-read
 
-		if (fileMode == 0x0080)
+		if ((fileMode & 0x0080) == 0x0080)
 			stringBuilder.append("w"); // write
 		else 
 			stringBuilder.append("-"); // non-write
 
-		if (fileMode == 0x0040)
+		if ((fileMode & 0x0040) == 0x0040)
 			stringBuilder.append("x"); // execute permission
 		else 
 			stringBuilder.append("-"); // non-execution permission
 
 		/* Group Permissions */
 		// drwxr-x
-		if(fileMode == 0x0020)
+		if((fileMode & 0x0020) == 0x0020)
 			stringBuilder.append("r");
 		else
 			stringBuilder.append("-");
 		
-		if(fileMode == 0x0010)
+		if((fileMode & 0x0010) == 0x0010)
 			stringBuilder.append("w");
 		else
 			stringBuilder.append("-");
 		
-		if(fileMode == 0x0008)
+		if((fileMode & 0x0008) == 0x0008)
 			stringBuilder.append("x");
 		else
 			stringBuilder.append("-");
 
 		/* Other Permissions */
 		// drwxr-xr-x |STOP HERE|
-		if(fileMode == 0x0004)
+		if((fileMode & 0x0004) == 0x0004)
 			stringBuilder.append("r");
 		else
 			stringBuilder.append("-");
 		
-		if(fileMode == 0x0002)
+		if((fileMode & 0x0002) == 0x0002)
 			stringBuilder.append("w");
 		else
 			stringBuilder.append("-");
 		
-		if(fileMode == 0x0001)
+		if((fileMode & 0x0001) == 0x0001)
 			stringBuilder.append("x ");
 		else
 			stringBuilder.append("- ");
@@ -209,7 +208,7 @@ public class Inode {
 		stringBuilder.append(lastModifiedInDateFormat.getHours() + 1 > 9 ? lastModifiedInDateFormat.getHours() + ":" : "0" + lastModifiedInDateFormat.getHours() + ":"); // 09:
 		stringBuilder.append(lastModifiedInDateFormat.getMinutes() + 1 > 9 ?lastModifiedInDateFormat.getMinutes() + " " : "0" + lastModifiedInDateFormat.getMinutes() + " "); // 09:01
 
-		/* Directory Name */
+		
 
 		return stringBuilder.toString() + "\n";
 	}

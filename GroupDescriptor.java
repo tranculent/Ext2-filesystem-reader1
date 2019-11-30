@@ -3,33 +3,19 @@ import java.nio.ByteOrder;
 
 public class GroupDescriptor {
     private ByteBuffer byteBuffer;
-    /**
-     * Array of inode table pointers
-     */
-    private int[] inodeTablePointers;
-    /**
-     * Stores the inode table size
-     */
-    private int tableSize;
-    /**
-     * Stores the Inode Table Pointer
-     */
-    private int inodeTablePointerOffset;
+    private int inodeTablePointer;
 
     /**
      * for clarification, revisit http://www.nongnu.org/ext2-doc/ext2.html#block-group-descriptor-table
+     * bytes => ((2048 + 12), 4) => 2048 (first block) + 12 (3rd block in the first block), (4 => the amount of bytes to be read)
      */
-    public GroupDescriptor(byte[] bytes, int groupCount) {
-        tableSize = 32;
-        inodeTablePointerOffset = 8;
-        inodeTablePointers = new int[groupCount];
+    public GroupDescriptor(int start, byte[] bytes) {
         byteBuffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
-
-        for (int i = 0; i < groupCount; i++) 
-            inodeTablePointers[i] = byteBuffer.getInt((tableSize * i) + inodeTablePointerOffset);
+        inodeTablePointer = byteBuffer.getInt(start);
+        System.out.println(inodeTablePointer);
     }
 
-    public int[] getInodeTablePointers() {
-        return inodeTablePointers;
+    public int getInodeTablePointer() {
+        return inodeTablePointer;
     }
 }

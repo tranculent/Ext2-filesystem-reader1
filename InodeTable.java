@@ -3,55 +3,55 @@ import java.nio.ByteOrder;
 
 public class InodeTable {
     private Ext2File file;
+    public Inode rootInode;
     private Inode inodes[];
-    private int wholeBlocks;
-    private int remainding;
+    private int blocksCount;
     private int inodesPerGroup;
     private int inodeSize;
     private byte byteBuffer[];
-    private ByteBuffer inodeTablePointer;
+    private GroupDescriptor groupDescriptors[];
     private int offset;
 
-    /**
-     * @param file The file to be examined
-     * @param superBlock The Superblock
-     */
     public InodeTable(Ext2File file, SuperBlock superBlock) {
         obtainInfo(file, superBlock);
-        populateFullGroupInodes();
-        populateRemaindingInodes();
+        populateInodes();
     }
-    
-    /**
-     * Obtaines general info from the Superblock and the Ext2File 
-     * @param file The file
-     * @param superBlock The superblock
-     */
+
     private void obtainInfo(Ext2File file, SuperBlock superBlock) {
-        this.file       = file;
-        inodes          = new Inode[superBlock.getInodesCount()];
-        wholeBlocks     = superBlock.getInodesCount() / superBlock.getInodesPerGroup();
-        remainding      = superBlock.getInodesCount() % superBlock.getInodesPerGroup();
-        inodesPerGroup  = superBlock.getInodesPerGroup();
-        inodeSize       = superBlock.getInodeSize();
+        this.file           = file;
+        inodes              = new Inode[superBlock.getInodesCount()];
+        inodeSize           = superBlock.getInodeSize();
+        inodesPerGroup      = superBlock.getInodesPerGroup();
+        blocksCount         = superBlock.getInodesCount() / superBlock.getInodesPerGroup();
+        groupDescriptors    = new GroupDescriptor[blocksCount];
     }
 
-    /**
-     * Populates the inodes in the whole blocks (without remainding ones)
-     */
-    private void populateFullGroupInodes() {        
-        for (int i = 0; i < wholeBlocks; i++) {
-            byteBuffer = file.read(2048 + (32 * i) + 8, 4); // read the inode information
-            inodeTablePointer = ByteBuffer.wrap(byteBuffer).order(ByteOrder.LITTLE_ENDIAN);
-            offset = inodeTablePointer.getInt() * 1024; // move to the next block
+    private void populateInodes() {
+        // (1024 + (84 * 1024) + 256) => root (inode2)
+        
+        for (int i = 0; i < blocksCount; i++) {
+            byteBuffer = file.read(2048 * (i > 0 ? i : 1) + 8 + 4); // gets the inodetablepointer for every block
+            groupDescriptors[i] = new GroupDescriptor(byteBuffer.length-4, byteBuffer);
+            offset = ByteBuffer.wrap(byteBuffer).order(ByteOrder.LITTLE_ENDIAN).getInt() * 1024;
 
-            // populating the array
-            inodes[j] = new Inode(offset, file); // PROBLEM 
+            inodes[inodesPerGroup * i] = new Inode(offset, file);
             offset += inodeSize;
         }
+    } 
+
+    public Inode getRootInode() {
+        return rootInode;
     }
 
-    private void populateRemaindingInodes() {
-    
+    public Inode[] getInodes() {
+        return inodes;
+    }
+
+    public GroupDescriptor[] getGroupDescriptors() {
+        return groupDescriptors;
+    }
+
+    public int getBlocksCount() {
+        return blocksCount;
     }
 }
