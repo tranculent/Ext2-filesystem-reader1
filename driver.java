@@ -17,14 +17,13 @@ public class driver {
         // new Helper().dumpHexBytes(f.read(1024, 136)); // block size => 1024
         System.out.println(sp);
         System.out.println("================================");
-        new Helper().dumpHexBytes(f.read(2048));
-        f.seek(0);
 
         InodeTable inodeTable = new InodeTable(f, sp);
-        GroupDescriptor groupDescriptors[] = new GroupDescriptor[inodeTable.getBlocksCount()];
-        groupDescriptors[0].getInodeTablePointer();
-        System.out.println(inodeTable.getInodes()[1]);
-        System.out.println(inodeTable.getInodes()[2]);
-        System.out.println(inodeTable.getRootInode());
+        GroupDescriptor groupDescriptors[] = inodeTable.getGroupDescriptors();
+        
+        // (1024 + (84 * 1024) + 256) => root (inode2)
+        Inode root = new Inode(1024 + (groupDescriptors[0].getInodeTablePointer() * 1024) + 256, f);
+        System.out.println(root);
+        new Helper().dumpHexBytes(f.read(1024 * 310, 1024));
     }
 }

@@ -27,15 +27,15 @@ public class InodeTable {
     }
 
     private void populateInodes() {
-        // (1024 + (84 * 1024) + 256) => root (inode2)
-        
+        int incrementalBlocKSize = 2048;
         for (int i = 0; i < blocksCount; i++) {
-            byteBuffer = file.read(2048 * (i > 0 ? i : 1) + 8 + 4); // gets the inodetablepointer for every block
+            byteBuffer = file.read(incrementalBlocKSize + 8 + 4); // gets the inodetablepointer for every block
             groupDescriptors[i] = new GroupDescriptor(byteBuffer.length-4, byteBuffer);
             offset = ByteBuffer.wrap(byteBuffer).order(ByteOrder.LITTLE_ENDIAN).getInt() * 1024;
 
             inodes[inodesPerGroup * i] = new Inode(offset, file);
             offset += inodeSize;
+            incrementalBlocKSize +=1024;
         }
     } 
 

@@ -18,7 +18,7 @@ public class Inode {
     /**
      * Indicates the permission
      */
-    private short fileMode; // fileMode == permission
+    private int fileMode; // fileMode == permission
     /**
      * Indicates the user id of the user accessing this file
      */
@@ -84,9 +84,10 @@ public class Inode {
     }
 	
     private void process() {
-		byteBuffer 				= ByteBuffer.wrap(file.read(startingPoint, 128)).order(ByteOrder.LITTLE_ENDIAN);
-		fileMode 				= byteBuffer.getShort(startingPoint + 0);
+		byteBuffer 				= ByteBuffer.wrap(file.read(startingPoint + 128)).order(ByteOrder.LITTLE_ENDIAN);
+		fileMode 				= byteBuffer.getInt(startingPoint + 0);
 		userId 					= byteBuffer.getShort(startingPoint + 2);
+		fileSize				= byteBuffer.getInt(startingPoint + 4);
 		lastAccessTime 			= byteBuffer.getInt(startingPoint + 8);
 		creationTime 			= byteBuffer.getInt(startingPoint + 12);
 		lastModifiedTime 		= byteBuffer.getInt(startingPoint + 16);
@@ -195,7 +196,7 @@ public class Inode {
 		stringBuilder.append(userId + " ");
 
 		/* Group ID */
-		stringBuilder.append(groupId + "    ");
+		stringBuilder.append(groupId + " ");
 
 		/* File Size */
 		stringBuilder.append(fileSize + " ");
@@ -207,9 +208,6 @@ public class Inode {
 		stringBuilder.append((lastModifiedInDateFormat.getDay() + " "));
 		stringBuilder.append(lastModifiedInDateFormat.getHours() + 1 > 9 ? lastModifiedInDateFormat.getHours() + ":" : "0" + lastModifiedInDateFormat.getHours() + ":"); // 09:
 		stringBuilder.append(lastModifiedInDateFormat.getMinutes() + 1 > 9 ?lastModifiedInDateFormat.getMinutes() + " " : "0" + lastModifiedInDateFormat.getMinutes() + " "); // 09:01
-
-		
-
 		return stringBuilder.toString() + "\n";
 	}
 
