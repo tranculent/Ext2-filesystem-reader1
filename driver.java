@@ -19,11 +19,12 @@ public class driver {
         System.out.println("================================");
 
         InodeTable inodeTable = new InodeTable(f, sp);
-        GroupDescriptor groupDescriptors[] = inodeTable.getGroupDescriptors();
+        GroupDescriptor grpDescriptor = new GroupDescriptor(f, inodeTable.getBlocksCount());
+        int inodeTablePointers[] = grpDescriptor.getInodeTablePointers();
         
         // (1024 + (84 * 1024) + 256) => root (inode2)
-        Inode root = new Inode(1024 + (groupDescriptors[0].getInodeTablePointer() * 1024) + 256, f);
+        Inode root = new Inode(1024 + (inodeTablePointers[0] * 1024) + 256, f);
         System.out.println(root);
-        new Helper().dumpHexBytes(f.read(1024 * 310, 1024));
+        // new Helper().dumpHexBytes(f.read(1024 * 310, 1024));
     }
 }
