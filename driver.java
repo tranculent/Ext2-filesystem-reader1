@@ -24,8 +24,8 @@ public class driver {
         System.out.println(sp);
         System.out.println("================================");
 
-        InodeTable inodeTable = new InodeTable(f, sp);
-        GroupDescriptor grpDescriptor = new GroupDescriptor(f, inodeTable.getBlocksCount());
+        GroupDescriptor grpDescriptor = new GroupDescriptor(f, sp.getInodesCount() / sp.getInodesPerGroup());
+        InodeTable inodeTable = new InodeTable(f, sp, grpDescriptor);
         int inodeTablePointers[] = grpDescriptor.getInodeTablePointers();
         
         for (int i = 0; i < inodeTablePointers.length; i++)
@@ -34,6 +34,13 @@ public class driver {
         // (1024 + (84 * 1024) + 256) => root (inode2)
         Inode root = new Inode(1024 + (inodeTablePointers[0] * 1024) + 256, f);
         System.out.println(root);
-        new Helper().dumpHexBytes(f.read(1024 * 310, 1024));
+        // new Helper().dumpHexBytes(f.read(1024 * 310, 1024));
+
+        Inode[] inodes = inodeTable.getInodes();
+
+        System.out.println("Starting..");
+        System.out.println(inodes[0]);
+        for (int i = 0; i < inodes.length; i++) 
+            if (inodes[i].getFileSize() == root.getFileSize()) System.out.println("I: " + i + " inode: " + inodes[i]);
     }
 }

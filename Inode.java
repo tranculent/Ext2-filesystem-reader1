@@ -102,7 +102,7 @@ public class Inode {
 
 		// Populate data block pointers
 		for (int i = 0; i < 12; i++) {
-			byteBuffer = ByteBuffer.wrap(file.read(40 + (i * 4), 4)).order(ByteOrder.LITTLE_ENDIAN);
+			byteBuffer = ByteBuffer.wrap(file.read(Constants.DATA_BLOCKS_POINTER + (i * 4), 4)).order(ByteOrder.LITTLE_ENDIAN);
 			dataBlockPointers[i] = byteBuffer.getInt();
 		}
 
@@ -199,10 +199,7 @@ public class Inode {
 		/* Dates */
 		Date lastModifiedInDateFormat = new Date((long) lastModifiedTime * 1000);
 
-		stringBuilder.append(months.get(lastModifiedInDateFormat.getMonth()) + " ");
-		stringBuilder.append((lastModifiedInDateFormat.getDay() + " "));	
-		stringBuilder.append(lastModifiedInDateFormat.getHours() + 1 > 9 ? lastModifiedInDateFormat.getHours() + ":" : "0" + lastModifiedInDateFormat.getHours() + ":"); // 09:
-		stringBuilder.append(lastModifiedInDateFormat.getMinutes() + 1 > 9 ?lastModifiedInDateFormat.getMinutes() + " " : "0" + lastModifiedInDateFormat.getMinutes() + " "); // 09:01
+		stringBuilder.append(lastModifiedInDateFormat.toString());
 		
 		return stringBuilder.toString() + "\n";
 	}

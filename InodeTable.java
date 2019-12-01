@@ -10,28 +10,35 @@ public class InodeTable {
     private int inodeSize;
     private byte byteBuffer[];
     private int offset;
+    private GroupDescriptor groupDescriptor;
+    private SuperBlock superBlock;
 
-    public InodeTable(Ext2File file, SuperBlock superBlock) {
-        obtainInfo(file, superBlock);
+    public InodeTable(Ext2File file, SuperBlock superBlock, GroupDescriptor groupDescriptor) {
+        obtainInfo(file, superBlock, groupDescriptor);
         populateInodes();
     }
 
-    private void obtainInfo(Ext2File file, SuperBlock superBlock) {
-        this.file           = file;
-        inodes              = new Inode[superBlock.getInodesCount()];
-        inodeSize           = superBlock.getInodeSize();
-        inodesPerGroup      = superBlock.getInodesPerGroup();
-        blocksCount         = superBlock.getInodesCount() / superBlock.getInodesPerGroup();
+    private void obtainInfo(Ext2File file, SuperBlock superBlock, GroupDescriptor groupDescriptor) {
+        this.file            = file;
+        this.groupDescriptor = groupDescriptor;
+        this.superBlock      = superBlock;
+        inodes               = new Inode[superBlock.getInodesCount()];
+        inodeSize            = superBlock.getInodeSize();
+        inodesPerGroup       = superBlock.getInodesPerGroup();
+        blocksCount          = superBlock.getInodesCount() / superBlock.getInodesPerGroup();
      }
 
     private void populateInodes() {
-        int incrementalBlocKSize = 2048;
+        ByteBuffer tempBuffer;
+
         for (int i = 0; i < blocksCount; i++) {
-            byteBuffer = file.read(incrementalBlocKSize + 8 + 4); // gets the inodetablepointer for every block
-            offset = ByteBuffer.wrap(byteBuffer).order(ByteOrder.LITTLE_ENDIAN).getInt() * 1024;
-            inodes[inodesPerGroup * i] = new Inode(offset, file);
-            offset += inodeSize;
-            incrementalBlocKSize +=1024;
+            tempBuffer = ByteBuffer.wrap(file.read(groupDescriptor.getInodeTablePointersLocations()[i], 1024)).order(ByteOrder.LITTLE_ENDIAN);
+            offset = tempBuffer.getInt() * 1024 + inodeSize;
+
+            for(int j = inodesPerGroup*i; j < inodesPerGroup*(i+1);  j++)
+			{
+				inodes[j] = new Inode(offset, file);
+			}
         }
     }
 
