@@ -1,5 +1,6 @@
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -84,24 +85,24 @@ public class Inode {
     }
 	
     private void process() {
-		byteBuffer 				= ByteBuffer.wrap(file.read(startingPoint + 128)).order(ByteOrder.LITTLE_ENDIAN);
-		fileMode 				= byteBuffer.getInt(startingPoint + 0);
-		userId 					= byteBuffer.getShort(startingPoint + 2);
-		fileSize				= byteBuffer.getInt(startingPoint + 4);
-		lastAccessTime 			= byteBuffer.getInt(startingPoint + 8);
-		creationTime 			= byteBuffer.getInt(startingPoint + 12);
-		lastModifiedTime 		= byteBuffer.getInt(startingPoint + 16);
-		deletedTime 			= byteBuffer.getInt(startingPoint + 20);
-		groupId 				= byteBuffer.getShort(startingPoint + 24);
-		numHardLinks 			= byteBuffer.getShort(startingPoint + 26);
-		indirectPointer 		= byteBuffer.getInt(startingPoint + 88);
-		doubleIndirectPointer 	= byteBuffer.getInt(startingPoint + 92);
-		tripleIndirectPointer 	= byteBuffer.getInt(startingPoint + 96);
+		byteBuffer 				= ByteBuffer.wrap(file.read(startingPoint, Constants.INODE_TABLE_SIZE)).order(ByteOrder.LITTLE_ENDIAN);
+		fileMode 				= byteBuffer.getInt(Constants.FILE_MODE_OFFSET);
+		userId 					= byteBuffer.getShort(Constants.USER_ID_OFFSET);
+		fileSize				= byteBuffer.getInt(Constants.FILE_SIZE_OFFSET);
+		lastAccessTime 			= byteBuffer.getInt(Constants.LAST_ACCESS_TIME_OFFSET);
+		creationTime 			= byteBuffer.getInt(Constants.CREATION_TIME_OFFSET);
+		lastModifiedTime 		= byteBuffer.getInt(Constants.LAST_MODIFIED_TIME_OFFSET);
+		deletedTime 			= byteBuffer.getInt(Constants.DELETED_TIME_OFFSET);
+		groupId 				= byteBuffer.getShort(Constants.GROUP_ID_OFFSET);
+		numHardLinks 			= byteBuffer.getShort(Constants.NUM_HARD_LINKS_OFFSET);
+		indirectPointer 		= byteBuffer.getInt(Constants.INDIRECT_POINTER_OFFSET);
+		doubleIndirectPointer 	= byteBuffer.getInt(Constants.DOUBLE_INDIRECT_POINTER_OFFSET);
+		tripleIndirectPointer 	= byteBuffer.getInt(Constants.TRIPLE_INDIRECT_POITNER_OFFSET);
 		dataBlockPointers 		= new int[12];
 
 		// Populate data block pointers
 		for (int i = 0; i < 12; i++) {
-			byteBuffer = ByteBuffer.wrap(file.read(startingPoint + 40 + (i * 4), 4)).order(ByteOrder.LITTLE_ENDIAN);
+			byteBuffer = ByteBuffer.wrap(file.read(40 + (i * 4), 4)).order(ByteOrder.LITTLE_ENDIAN);
 			dataBlockPointers[i] = byteBuffer.getInt();
 		}
 
@@ -122,14 +123,6 @@ public class Inode {
 	@Deprecated
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
-
-		/*
-		   	drwxr-xr-x  4 root root   1024 Aug 13 20:20
-			drwxr-xr-x 25 root root   4096 Aug 11 11:15
-			drwxr-xr-x  3 acs  staff  1024 Aug 13 20:20
-			drwx------  2 root root  12288 Aug 11 11:06
-			-rw-r--r--  1 acs  staff     0 Aug 11 22:17
-		*/
 
 		/* File Type */
 		// d
@@ -201,16 +194,19 @@ public class Inode {
 		/* File Size */
 		stringBuilder.append(fileSize + " ");
 
+		System.out.println(lastModifiedTime);
+
 		/* Dates */
-		Date lastModifiedInDateFormat = new Date((long)lastModifiedTime * 1000L);
-		
+		Date lastModifiedInDateFormat = new Date((long) lastModifiedTime * 1000);
+
 		stringBuilder.append(months.get(lastModifiedInDateFormat.getMonth()) + " ");
-		stringBuilder.append((lastModifiedInDateFormat.getDay() + " "));
+		stringBuilder.append((lastModifiedInDateFormat.getDay() + " "));	
 		stringBuilder.append(lastModifiedInDateFormat.getHours() + 1 > 9 ? lastModifiedInDateFormat.getHours() + ":" : "0" + lastModifiedInDateFormat.getHours() + ":"); // 09:
 		stringBuilder.append(lastModifiedInDateFormat.getMinutes() + 1 > 9 ?lastModifiedInDateFormat.getMinutes() + " " : "0" + lastModifiedInDateFormat.getMinutes() + " "); // 09:01
+		
 		return stringBuilder.toString() + "\n";
 	}
-
+	
 	public int getStartingPoint() {
         return this.startingPoint;
     }

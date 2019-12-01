@@ -22,22 +22,17 @@ public class InodeTable {
         inodeSize           = superBlock.getInodeSize();
         inodesPerGroup      = superBlock.getInodesPerGroup();
         blocksCount         = superBlock.getInodesCount() / superBlock.getInodesPerGroup();
-    }
+     }
 
     private void populateInodes() {
         int incrementalBlocKSize = 2048;
         for (int i = 0; i < blocksCount; i++) {
             byteBuffer = file.read(incrementalBlocKSize + 8 + 4); // gets the inodetablepointer for every block
             offset = ByteBuffer.wrap(byteBuffer).order(ByteOrder.LITTLE_ENDIAN).getInt() * 1024;
-
             inodes[inodesPerGroup * i] = new Inode(offset, file);
             offset += inodeSize;
             incrementalBlocKSize +=1024;
         }
-    } 
-
-    public Inode getRootInode() {
-        return rootInode;
     }
 
     public Inode[] getInodes() {

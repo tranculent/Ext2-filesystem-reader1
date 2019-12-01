@@ -4,7 +4,6 @@ import java.io.IOException;
 
 public class SuperBlock {
 	private Ext2File file;
-	private int startingPoint;
 	private String volumeName;
 	private int magicNumber;
 	private int inodesCount;
@@ -14,27 +13,26 @@ public class SuperBlock {
 	private int inodesPerGroup;
 	private ByteBuffer byteBuffer;
 
-	public SuperBlock(int start, Ext2File file) throws IOException {
-		// bytes represents the data that is stored in the Superblock
-		startingPoint = start;
+	public SuperBlock(Ext2File file) throws IOException {
 		this.file = file;
 		process();
 	}
 
 	private void process() throws IOException {
 		// read the bytes from the file and order it as LITTLE_ENDIAN
-		byteBuffer 	   = ByteBuffer.wrap(file.read(startingPoint + 136)).order(ByteOrder.LITTLE_ENDIAN);
+		byteBuffer 	   = ByteBuffer.wrap(file.read(Constants.SUPERBLOCK_OFFSET, 136)).order(ByteOrder.LITTLE_ENDIAN);
 		// System.out.println(file.size());
-		magicNumber    = byteBuffer.getInt(startingPoint + 56); 	// magic number     offset
-		inodesCount    = byteBuffer.getInt(startingPoint + 0);  	// inodes count     offset
-		inodeSize      = byteBuffer.getInt(startingPoint + 88); 	// inodes size      offset
-		blocksCount    = byteBuffer.getInt(startingPoint + 4);  	// blocks count     offset
-		blocksPerGroup = byteBuffer.getInt(startingPoint + 32); 	// blocks per group offset
-		inodesPerGroup = byteBuffer.getInt(startingPoint + 40);	 	// inodes per group offset
+		magicNumber    = byteBuffer.getInt(Constants.MAGIC_NUMBER_OFFSET); // magic number offset
+		inodesCount    = byteBuffer.getInt(Constants.INODES_COUNT_OFFSET);  	// inodes count offset
+		inodeSize      = byteBuffer.getInt(Constants.INODES_SIZE_OFFSET); 	// inodes size      offset
+		blocksCount    = byteBuffer.getInt(Constants.BLOCKS_COUNT_OFFSET);  	// blocks count     offset
+		blocksPerGroup = byteBuffer.getInt(Constants.BLOCKS_PER_GROUP_OFFSET); 	// blocks per group offset
+		inodesPerGroup = byteBuffer.getInt(Constants.INODES_PER_GROUP_OFFSET);	 	// inodes per group offset
 
 		byte[] volumeBytes = new byte[16];
 		int index = 0;
-		for (int i = 120; i < 136; i++) 
+
+		for (int i = Constants.VOLUME_NAME_OFFSET; i < 136; i++) 
 			volumeBytes[index++] = byteBuffer.get(i);
 		
 		volumeName = new String(volumeBytes);

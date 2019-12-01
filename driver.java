@@ -1,9 +1,15 @@
 
+/**
+ * TODO:
+ * 1. FIND INODES IN EACH GROUP
+ * 2. 
+ */
+
 public class driver {
     public static void main(String[] args) throws Exception {
         Volume vol = new Volume("ext2fs");
         Ext2File f = new Ext2File(vol);
-        SuperBlock sp = new SuperBlock(1024, f);
+        SuperBlock sp = new SuperBlock(f);
         
         System.out.println();
         System.out.println("File Content: ");
@@ -22,9 +28,12 @@ public class driver {
         GroupDescriptor grpDescriptor = new GroupDescriptor(f, inodeTable.getBlocksCount());
         int inodeTablePointers[] = grpDescriptor.getInodeTablePointers();
         
+        for (int i = 0; i < inodeTablePointers.length; i++)
+            System.out.println(inodeTablePointers[i]);
+
         // (1024 + (84 * 1024) + 256) => root (inode2)
         Inode root = new Inode(1024 + (inodeTablePointers[0] * 1024) + 256, f);
         System.out.println(root);
-        // new Helper().dumpHexBytes(f.read(1024 * 310, 1024));
+        new Helper().dumpHexBytes(f.read(1024 * 310, 1024));
     }
 }
