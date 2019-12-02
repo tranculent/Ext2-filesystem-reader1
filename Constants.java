@@ -4,6 +4,9 @@ public final class Constants {
         // restrict instantiation
     }
 
+    /* Generic Fields */
+    public static final int BLOCK_SIZE                      = 1024;
+
     /* SuperBlock Fields */
     public static final int INODES_COUNT_OFFSET             = 0;
     public static final int BLOCKS_COUNT_OFFSET             = 4;

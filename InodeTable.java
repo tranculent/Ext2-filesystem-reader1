@@ -32,12 +32,14 @@ public class InodeTable {
         ByteBuffer tempBuffer;
 
         for (int i = 0; i < blocksCount; i++) {
-            tempBuffer = ByteBuffer.wrap(file.read(groupDescriptor.getInodeTablePointersLocations()[i], 1024)).order(ByteOrder.LITTLE_ENDIAN);
-            offset = tempBuffer.getInt() * 1024 + inodeSize;
+            tempBuffer  = ByteBuffer.wrap(file.read(groupDescriptor.getInodeTablePointersLocations()[i], 1024)).order(ByteOrder.LITTLE_ENDIAN);
+            offset      = tempBuffer.getInt() * Constants.BLOCK_SIZE;
 
+            // i(0), j -> 1712; i(1), j -> 1712 * 2 = 3424; i(2), j -> 1712 * 3 = 5136;
             for(int j = inodesPerGroup*i; j < inodesPerGroup*(i+1);  j++)
 			{
-				inodes[j] = new Inode(offset, file);
+                inodes[j] = new Inode(offset, file);
+                offset += inodeSize;
 			}
         }
     }

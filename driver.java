@@ -37,10 +37,13 @@ public class driver {
         // new Helper().dumpHexBytes(f.read(1024 * 310, 1024));
 
         Inode[] inodes = inodeTable.getInodes();
+        System.out.println(inodes.length);
 
-        System.out.println("Starting..");
-        System.out.println(inodes[0]);
+
         for (int i = 0; i < inodes.length; i++) 
-            if (inodes[i].getFileSize() == root.getFileSize()) System.out.println("I: " + i + " inode: " + inodes[i]);
+        {
+            System.out.println("I: " + i + " inode: " + inodes[i]);
+            if (i == 2000) break;
+        }
     }
 }
