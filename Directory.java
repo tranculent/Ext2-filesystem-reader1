@@ -1,10 +1,34 @@
 import java.lang.System;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+/**
+ * Traverses through FileInfo entries
+ */
 public class Directory {
-	private InodeTable inodes;
-    private FileInfo info[];
-    
-    public Directory(InodeTable inodes) {
+    private Ext2File file;
+    private Inode[] inodes;
+    private int inode;
+    private short length;
+    private short nameLen;
+    private byte[] fileName;
+    private int fileType;
+
+    public Directory(Inode[] inodes, Ext2File file) {
+        this.file   = file;
         this.inodes = inodes;
+
+        for (int i = 0; i < inodes.length; i++) {
+            for (int j = 0; j < 12; j++) {
+                if (inodes[i].getDataBlockPointers()[j] != 0) {
+                    nameLen = ByteBuffer.wrap(file.read(inodes[i].getDataBlockPointers()[j] * 1024 + 6, 2)).order(ByteOrder.LITTLE_ENDIAN).getShort();
+                    System.out.println("Name Len: "  + nameLen);
+                    String name = new String(file.read(inodes[i].getDataBlockPointers()[j] * 1024 + 8, nameLen));
+                    System.out.println(name);
+                }
+            }
+        }
+        
     }
 
     /**

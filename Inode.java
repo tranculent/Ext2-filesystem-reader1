@@ -69,11 +69,6 @@ public class Inode {
      * Pointer to a trebly-indirect block which contains pointers to doubly-indirect blocks
      */
 	private int tripleIndirectPointer;
-
-	/**
-	 * HashMap that will store all the months in <Integer, String> format
-	 */
-	private HashMap<Integer, String> months = new HashMap<>();
 	
 	private Ext2File file;
 	private ByteBuffer byteBuffer;
@@ -102,22 +97,9 @@ public class Inode {
 
 		// Populate data block pointers
 		for (int i = 0; i < 12; i++) {
-			byteBuffer = ByteBuffer.wrap(file.read(Constants.DATA_BLOCKS_POINTER + (i * 4), 4)).order(ByteOrder.LITTLE_ENDIAN);
+			byteBuffer = ByteBuffer.wrap(file.read(startingPoint + Constants.DATA_BLOCKS_POINTER + (i * 4), 4)).order(ByteOrder.LITTLE_ENDIAN);
 			dataBlockPointers[i] = byteBuffer.getInt();
 		}
-
-		months.put(0, "Jan");
-		months.put(1, "Fev");
-		months.put(2, "Mar");
-		months.put(3, "Apr");
-		months.put(4, "May");
-		months.put(5, "Jun");
-		months.put(6, "Jul");
-		months.put(7, "Aug");
-		months.put(8, "Sep");
-		months.put(9, "Oct");
-		months.put(10, "Nov");
-		months.put(11, "Dec");
 	}
 
 	@Deprecated
@@ -193,8 +175,6 @@ public class Inode {
 
 		/* File Size */
 		stringBuilder.append(fileSize + " ");
-
-		System.out.println(lastModifiedTime);
 
 		/* Dates */
 		Date lastModifiedInDateFormat = new Date((long) lastModifiedTime * 1000);
