@@ -33,7 +33,6 @@ public class InodeTable {
 
         for (int i = 0; i < blocksCount; i++) {
             tempBuffer  = ByteBuffer.wrap(file.read(groupDescriptor.getInodeTablePointersLocations()[i], 1024)).order(ByteOrder.LITTLE_ENDIAN);
-            System.out.println("Location: " + groupDescriptor.getInodeTablePointersLocations()[i]);
             offset      = tempBuffer.getInt() * Constants.BLOCK_SIZE;
 
             // i(0), j -> 1712; i(1), j -> 1712 * 2 = 3424; i(2), j -> 1712 * 3 = 5136;

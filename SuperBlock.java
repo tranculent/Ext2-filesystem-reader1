@@ -19,9 +19,7 @@ public class SuperBlock {
 	}
 
 	private void process() throws IOException {
-		// read the bytes from the file and order it as LITTLE_ENDIAN
 		byteBuffer 	   = ByteBuffer.wrap(file.read(Constants.SUPERBLOCK_OFFSET, 136)).order(ByteOrder.LITTLE_ENDIAN);
-		// System.out.println(file.size());
 		magicNumber    = byteBuffer.getInt(Constants.MAGIC_NUMBER_OFFSET); // magic number offset
 		inodesCount    = byteBuffer.getInt(Constants.INODES_COUNT_OFFSET);  	// inodes count offset
 		inodeSize      = byteBuffer.getInt(Constants.INODES_SIZE_OFFSET); 	// inodes size      offset
@@ -36,19 +34,22 @@ public class SuperBlock {
 			volumeBytes[index++] = byteBuffer.get(i);
 		
 		volumeName = new String(volumeBytes);
+
+		System.out.println(this);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
-
 		stringBuilder.append("==================Superblock Contents==================\n");
-		stringBuilder.append("Magic Number: " + magicNumber);
+		stringBuilder.append(String.format("Magic Number: 0x%02X", magicNumber));
 		stringBuilder.append("\nInodes Count: " + inodesCount);
 		stringBuilder.append("\nInode Size: " + inodeSize);
 		stringBuilder.append("\nBlocks Count: " + blocksCount);
 		stringBuilder.append("\nBlocks Per Group: " + blocksPerGroup);
 		stringBuilder.append("\nInodes Per Group: " + inodesPerGroup);
+		stringBuilder.append("\nVolume Name: " + volumeName);
+		stringBuilder.append("\n=======================================================\n");
 
 		return stringBuilder.toString();
 	}

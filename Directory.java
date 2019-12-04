@@ -8,27 +8,34 @@ import java.nio.ByteOrder;
 public class Directory {
     private Ext2File file;
     private Inode[] inodes;
-    private int inode;
-    private short length;
-    private short nameLen;
-    private byte[] fileName;
-    private int fileType;
+   
+    private int offset;
+    private int fileInfoIndex;
+
+    private FileInfo[] fileInfoArray;
 
     public Directory(Inode[] inodes, Ext2File file) {
+        
         this.file   = file;
         this.inodes = inodes;
+        fileInfoIndex = 0;
+        int sizeOfFileInfo = 0;
+
+        for (int i = 0; i < inodes.length; i++) 
+            for (int j = 0; j < 12; j++) 
+                if (inodes[i].getDataBlockPointers()[j] != 0) 
+                    sizeOfFileInfo++;
+
+        fileInfoArray = new FileInfo[sizeOfFileInfo];
 
         for (int i = 0; i < inodes.length; i++) {
             for (int j = 0; j < 12; j++) {
                 if (inodes[i].getDataBlockPointers()[j] != 0) {
-                    nameLen = ByteBuffer.wrap(file.read(inodes[i].getDataBlockPointers()[j] * 1024 + 6, 2)).order(ByteOrder.LITTLE_ENDIAN).getShort();
-                    System.out.println("Name Len: "  + nameLen);
-                    String name = new String(file.read(inodes[i].getDataBlockPointers()[j] * 1024 + 8, nameLen));
-                    System.out.println(name);
+                    offset = inodes[i].getDataBlockPointers()[j] * 1024;
+                    fileInfoArray[fileInfoIndex++] = new FileInfo(offset, file);   
                 }
             }
         }
-        
     }
 
     /**
@@ -43,6 +50,6 @@ public class Directory {
     */
 
     public FileInfo[] getFileInfo() {
-        return null;
+        return fileInfoArray;
     }
 }

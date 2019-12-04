@@ -16,6 +16,19 @@ public class GroupDescriptor {
             inodeTablePointers[i] = byteBuffer.getInt((i * Constants.GROUP_DESCRIPTOR_LENGTH) + Constants.INODE_TABLE_POINTER_OFFSET);
             inodeTablePointersLocations[i] = 2048 + (i * Constants.GROUP_DESCRIPTOR_LENGTH) + Constants.INODE_TABLE_POINTER_OFFSET;
         }
+
+        System.out.println(this);
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n====================GROUP DESCRIPTOR CONTENT====================");
+        
+        for (int i = 0; i < inodeTablePointers.length; i++) 
+            sb.append("\nInode Table Pointer " + i + ": " + inodeTablePointers[i]);
+        
+        sb.append("\n================================================================");
+        return sb.toString();
     }
 
     public int[] getInodeTablePointers() {
