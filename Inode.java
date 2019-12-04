@@ -181,7 +181,7 @@ public class Inode {
 
 		stringBuilder.append(lastModifiedInDateFormat.toString());
 		
-		return stringBuilder.toString() + "\n";
+		return stringBuilder.toString();
 	}
 	
 	public int getStartingPoint() {

@@ -22,9 +22,9 @@ public class driver {
 
         Directory d = new Directory(inodes, f);
 
-        Scanner scanner = new Scanner(System.in));
+        Scanner scanner = new Scanner(System.in);
 
-        for (int i = 0; i < d.getFileInfo().length; i++) 
-            d.getFileInfo()[i].printFileInfo();
+        // for (int i = 0; i < d.getFileInfo().length; i++) 
+        //     d.getFileInfo()[i].printFileInfo();
     }
 }

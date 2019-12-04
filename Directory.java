@@ -1,6 +1,7 @@
 import java.lang.System;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.*;
 
 /**
  * Traverses through FileInfo entries
@@ -15,6 +16,12 @@ public class Directory {
     private FileInfo[] fileInfoArray;
 
     public Directory(Inode[] inodes, Ext2File file) {
+
+        /* 
+        NOTES++++
+        1. Change while loop
+        2. Understand it further
+        */
         
         this.file   = file;
         this.inodes = inodes;
@@ -26,16 +33,24 @@ public class Directory {
                 if (inodes[i].getDataBlockPointers()[j] != 0) 
                     sizeOfFileInfo++;
 
-        fileInfoArray = new FileInfo[sizeOfFileInfo];
+        ArrayList<FileInfo> fileInfos = new ArrayList<>();
 
-        for (int i = 0; i < inodes.length; i++) {
-            for (int j = 0; j < 12; j++) {
-                if (inodes[i].getDataBlockPointers()[j] != 0) {
-                    offset = inodes[i].getDataBlockPointers()[j] * 1024;
-                    fileInfoArray[fileInfoIndex++] = new FileInfo(offset, file);   
-                }
-            }
+        offset = 0;
+
+        while (offset < 1024) {
+            FileInfo fInfo = new FileInfo(offset + inodes[1].getDataBlockPointers()[0] * 1024, file);
+            fileInfos.add(fInfo);
+            offset += fInfo.getLength();
+            // fileInfoArray[fileInfoIndex++] =; 
+            // offset += fileInfoArray[fileInfoIndex - 1].getLength();
         }
+
+        fileInfoArray = new FileInfo[fileInfos.size()];
+        fileInfoArray = fileInfos.toArray(fileInfoArray);
+
+        for (int i = 0; i < fileInfoArray.length; i++)
+            if (fileInfoArray[i].getInodeNum() > 0)
+                System.out.println(inodes[fileInfoArray[i].getInodeNum() - 1] + " " + fileInfoArray[i].getName());
     }
 
     /**
