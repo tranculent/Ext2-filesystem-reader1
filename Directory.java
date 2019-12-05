@@ -36,47 +36,54 @@ public class Directory {
         for (int i = 0; i < fileInfoArray.length; i++)
             System.out.println(inodes[fileInfoArray[i].getInodeNum() - 1] + " " + fileInfoArray[i].getName());
 
-        /* TRAVERSE Directories enlisted */
-        while (true) {
-            Scanner scanner = new Scanner(System.in);
-            System.out.print(">>>");
-            String answer = scanner.nextLine();
+       /* TRAVERSE Directories enlisted */
+       while (true) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print(">>>");
+        String answer = scanner.nextLine();
 
-            if (answer.equals("ls")) 
-                for (int i = 0; i < fileInfoArray.length; i++)
-                    System.out.println(inodes[fileInfoArray[i].getInodeNum() - 1] + " " + fileInfoArray[i].getName());
-            
-            for (int i = 0; i < fileInfoArray.length; i++) {
-                if (answer.equals("cd " + fileInfoArray[i].getName())) {
-                    Inode inodeToBeSearched = inodes[fileInfoArray[i].getInodeNum() - 1];
-                    for (int j = 0; j < inodeToBeSearched.getDataBlockPointers().length; j++) {
-                        if (inodeToBeSearched.getDataBlockPointers()[j] != 0) {
-                            Inode contentToBeRead = new Inode(inodeToBeSearched.getDataBlockPointers()[j] * 1024, file);
+        if (answer.equals("ls")) 
+            for (int i = 0; i < fileInfoArray.length; i++)
+                System.out.println(inodes[fileInfoArray[i].getInodeNum() - 1] + " " + fileInfoArray[i].getName());
+        
+        if (answer.equals("exit")) break;
+        
+        for (int i = 0; i < fileInfoArray.length; i++) {
+            if (answer.equals("cd " + fileInfoArray[i].getName())) {
+                Inode inodeToBeSearched = inodes[fileInfoArray[i].getInodeNum() - 1];
+                for (int j = 0; j < inodeToBeSearched.getDataBlockPointers().length; j++) {
+                    if (inodeToBeSearched.getDataBlockPointers()[j] != 0) {
+                        Inode contentToBeRead = new Inode(inodeToBeSearched.getDataBlockPointers()[j] * 1024, file);
 
-                            fileInfos.clear();
+                        fileInfos.clear();
 
-                            if (!contentToBeRead.isFile()) {
-                                offset = 0;
-                                while (offset < 1024) {
-                                    FileInfo fInfo = new FileInfo(offset + inodeToBeSearched.getDataBlockPointers()[j] * 1024, file);
-                                    fileInfos.add(fInfo);
-                                    offset += fInfo.getLength();
-                                    // System.out.println("Inode: " + inodes[fInfo.getInodeNum() - 1] + " " + fInfo.getName() + ", length: " + fInfo.getLength());
-                                }
-                        
-                                FileInfo[] innerFilesArray = new FileInfo[fileInfos.size()];
-                                innerFilesArray = fileInfos.toArray(innerFilesArray);
-                        
-                                for (int k = 0; k < innerFilesArray.length; k++)
-                                    System.out.println(inodes[innerFilesArray[k].getInodeNum() - 1] + " " + innerFilesArray[k].getName());
+                        if (!contentToBeRead.isFile()) {
+                            offset = 0;
+                            while (offset < 1024) {
+                                FileInfo fInfo = new FileInfo(offset + inodeToBeSearched.getDataBlockPointers()[j] * 1024, file);
+                                fileInfos.add(fInfo);
+                                offset += fInfo.getLength();
+                                // System.out.println("Inode: " + inodes[fInfo.getInodeNum() - 1] + " " + fInfo.getName() + ", length: " + fInfo.getLength());
                             }
-                            else
-                                System.out.println("nope:");
+                    
+                            // FileInfo[] innerFilesArray = new FileInfo[fileInfos.size()];
+                            fileInfoArray = new FileInfo[fileInfos.size()];
+                            fileInfoArray = fileInfos.toArray(fileInfoArray);
+                    
+                            // FIX
+                            for (int k = 0; k < fileInfoArray.length; k++) {
+                                if (fileInfoArray[k].getInodeNum() < 5136) {
+                                    System.out.println(inodes[fileInfoArray[k].getInodeNum() - 1] + " " + fileInfoArray[k].getName());
+                                }
+                            }
                         }
+                        else
+                            System.out.println("nope:");
                     }
                 }
             }
         }
+    }
     }
 
     public FileInfo[] getFileInfo() {
