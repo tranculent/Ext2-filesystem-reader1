@@ -49,7 +49,7 @@ public class SuperBlock {
 		stringBuilder.append("\nBlocks Per Group: " + blocksPerGroup);
 		stringBuilder.append("\nInodes Per Group: " + inodesPerGroup);
 		stringBuilder.append("\nVolume Name: " + volumeName);
-		stringBuilder.append("\n=======================================================\n");
+		stringBuilder.append("\n=======================================================");
 
 		return stringBuilder.toString();
 	}

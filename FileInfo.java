@@ -16,12 +16,13 @@ public class FileInfo {
         nameLen = file.read(offset + 6, 1)[0];
         fileName = new String(file.read(offset + 8, nameLen));
         inodeNum = ByteBuffer.wrap(file.read(offset, 4)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-        
     }
 
     public void printFileInfo() {
         System.out.println("Inode Number: " + inodeNum);
-		System.out.println("length: " + length);
+        System.out.println("length: " + length);
+        System.out.println("File Name: " + fileName);
+        System.out.println("Name Length: " + nameLen);
     }
 
     public short getLength() {
@@ -34,5 +35,9 @@ public class FileInfo {
 
     public String getName() {
         return fileName;
+    }
+
+    public int getNameLen() {
+        return nameLen;
     }
 }

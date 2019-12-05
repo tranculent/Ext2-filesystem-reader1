@@ -69,6 +69,8 @@ public class Inode {
      * Pointer to a trebly-indirect block which contains pointers to doubly-indirect blocks
      */
 	private int tripleIndirectPointer;
+
+	private boolean isFile;
 	
 	private Ext2File file;
 	private ByteBuffer byteBuffer;
@@ -108,11 +110,15 @@ public class Inode {
 
 		/* File Type */
 		// d
-		if ((fileMode & 0x8000) == 0x8000)
+		if ((fileMode & 0x8000) == 0x8000) {
 			stringBuilder.append("-"); // file
-		else if ((fileMode & 0x4000) == 0x4000)
+			isFile = true;
+		}
+		else if ((fileMode & 0x4000) == 0x4000) {
 			stringBuilder.append("d"); // directory
-
+			isFile = false;
+		}
+			
 		/* User Permissions */ 
 		// drwx
 		if ((fileMode & 0x0100) == 0x0100)
@@ -238,5 +244,9 @@ public class Inode {
 
 	public int getTripleIndirectPointer() {
 		return this.tripleIndirectPointer;
+	}
+
+	public boolean isFile() {
+		return isFile; 
 	}
 }
