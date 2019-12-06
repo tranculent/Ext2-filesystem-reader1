@@ -43,7 +43,7 @@ public class Directory {
             Scanner scanner = new Scanner(System.in);
             System.out.print(">>>");
             String answer = scanner.nextLine();
-
+            fileInfos.clear();
             if (answer.equals("ls")) {
 
                 System.out.println("Array in ls: " + fileInfoArray.length);
@@ -56,17 +56,15 @@ public class Directory {
             }   
             
             if (answer.equals("exit")) break;
-int index =0;
+
             for (int i = 0; i < fileInfoArray.length; i++) {
 
-                if (answer.equals("cd " + fileInfoArray[i].getName())) {
+                if (answer.equals("cd " + fileInfoArray[i].getName()) && !inodes[fileInfoArray[i].getInodeNum() > 0 ? fileInfoArray[i].getInodeNum() - 1 : fileInfoArray[i].getInodeNum()].isFile()) {
                     Inode inodeToBeSearched = inodes[fileInfoArray[i].getInodeNum() > 0 ? fileInfoArray[i].getInodeNum() - 1 : fileInfoArray[i].getInodeNum()];
 
                     for (int j = 0; j < inodeToBeSearched.getDataBlockPointers().length; j++) {
 
                         if (inodeToBeSearched.getDataBlockPointers()[j] != 0) {
-
-                            fileInfos.clear();
 
                             offset = 0;
 
@@ -74,7 +72,6 @@ int index =0;
 
                                 FileInfo fInfo = new FileInfo(offset + inodeToBeSearched.getDataBlockPointers()[j] * 1024, file);
                                 fileInfos.add(fInfo);
-                                System.out.println("File Info: " + index++);
                                 offset += fInfo.getLength();
                                 // System.out.println("File Info: " + fileInfos.size());
                             }                        
